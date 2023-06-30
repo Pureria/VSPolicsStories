@@ -10,12 +10,16 @@ public class Movement : CoreComponent
 
     private Vector3 workspace;
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
-        myRB = GetComponentInParent<Rigidbody>();
+        base.Start();
 
+        if (!this.IsOwner)
+            return;
+
+        myRB = GetComponentInParent<Rigidbody>();
         CanSetVelocity = true;
+        SetInitVariablesServerRpc();
     }
 
     public override void LogicUpdate()
@@ -24,24 +28,36 @@ public class Movement : CoreComponent
     }
 
     #region Set Function
-    public void SetVelocityZero()
+    [Unity.Netcode.ServerRpc]
+    public void SetVelocityZeroServerRpc()
     {
         workspace = Vector3.zero;
         SetFinalVelocity();
     }
 
-    public void SetVelocity(Vector3 velocity, float speed)
+    [Unity.Netcode.ServerRpc]
+    public void SetVelocityServerRpc(Vector3 velocity, float speed)
     {
         workspace = velocity.normalized * speed;
         SetFinalVelocity();
     }
 
+    [Unity.Netcode.ServerRpc]
+    private void SetInitVariablesServerRpc()
+    {
+        myRB = GetComponentInParent<Rigidbody>();
+        CanSetVelocity = true;
+    }
+
     private void SetFinalVelocity()
     {
-        if (CanSetVelocity)
+        if(IsServer)
         {
-            myRB.velocity = workspace;
-            CurrentVelocity = workspace;
+            if (CanSetVelocity)
+            {
+                myRB.velocity = workspace;
+                CurrentVelocity = workspace;
+            }
         }
     }
 

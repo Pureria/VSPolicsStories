@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
-using static UnityEditor.VersionControl.Asset;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     #region State Variables
     public PlayerStateMachine stateMachine { get; private set; }
@@ -47,26 +47,38 @@ public class PlayerController : MonoBehaviour
     #region Unity Callback Function
     private void Awake()
     {
+    }
+
+    private void Start()
+    {
+        if (!this.IsOwner)
+            return;
+
+        SetPlayerNameServerRpc(this.IsServer);
+
         Core = GetComponentInChildren<Core>();
         stateMachine = new PlayerStateMachine();
 
         IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
         MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
 
-    }
+        //デバッグ用
+        transform.position = new Vector3(transform.position.x,transform.position.y + 0.2f,transform.position.z);
 
-    private void Start()
-    {
         myRB = GetComponent<Rigidbody>();
         myColl = GetComponent<CapsuleCollider>();
         inputController = GetComponent<PlayerInputHandler>();
         Anim = GetComponent<Animator>();
 
         stateMachine.Initialize(IdleState);
+        SetPlayerServerRpc();
     }
 
     private void Update()
     {
+        if (!this.IsOwner)
+            return;
+
         Core.LogicUpdate();
         stateMachine.CurrentState.LogicUpdate();
 
@@ -76,7 +88,7 @@ public class PlayerController : MonoBehaviour
         if (plane.Raycast(ray, out distance))
         {
             Vector3 lookpoint = ray.GetPoint(distance);
-            Rotation.SetRotation(lookpoint);
+            Rotation.SetRotationServerRpc(lookpoint);
         }
     }
 
@@ -88,6 +100,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!this.IsOwner)
+            return;
+
         stateMachine.CurrentState.PhysicsUpdate();
     }
     #endregion
@@ -125,6 +140,21 @@ public class PlayerController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    [Unity.Netcode.ServerRpc]
+    private void SetPlayerServerRpc()
+    {
+        GameManagerControll.Singleton?.PlayerSet(this, transform);
+    }
+
+    [Unity.Netcode.ServerRpc]
+    private void SetPlayerNameServerRpc(bool isServer)
+    {
+        if (isServer)
+            this.gameObject.name = "Player(Host)";
+        else
+            this.gameObject.name = "Player(Client)";
     }
     #endregion
 }

@@ -18,7 +18,7 @@ public class PlayerIdleState : PlayerState
     {
         base.Enter();
 
-        Movement?.SetVelocityZero();
+        Movement?.SetVelocityZeroServerRpc();
     }
 
     public override void Exit()
