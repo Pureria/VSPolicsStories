@@ -23,7 +23,8 @@ public class HostClientButton : MonoBehaviour
 
     public void StartClient()
     {
-        //Unity.Netcode.NetworkManager.Singleton.StartClient();        string code = codeInputField.text;
+        //Unity.Netcode.NetworkManager.Singleton.StartClient();
+        string code = codeInputField.text;
         code.Substring(0, 6);
         UTJ.NetcodeGameObjectSample.RelayServiceUtility.StartClientUnityRelayModeAsync(code);
     }
