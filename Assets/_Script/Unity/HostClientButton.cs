@@ -5,10 +5,15 @@ using UnityEngine.UI;
 public class HostClientButton : MonoBehaviour
 {
     [SerializeField]
-    private TextMeshProUGUI codeInputField;
+    private InputField codeInputField;
 
     [SerializeField]
     private TextMeshProUGUI codeText;
+
+    private void Start()
+    {
+        codeInputField.text = "";
+    }
 
     public void StartHost()
     {

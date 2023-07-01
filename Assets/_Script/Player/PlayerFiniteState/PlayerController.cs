@@ -35,6 +35,8 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
     #region Other Variables
+    public static PlayerController Owner = null;
+
     private Vector3 workspace;
 
     private Plane plane = new Plane();
@@ -53,6 +55,8 @@ public class PlayerController : NetworkBehaviour
     {
         if (!this.IsOwner)
             return;
+        else
+            Owner = this;
 
         SetPlayerNameServerRpc(this.IsServer);
 
