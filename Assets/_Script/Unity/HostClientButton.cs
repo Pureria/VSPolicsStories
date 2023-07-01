@@ -23,9 +23,7 @@ public class HostClientButton : MonoBehaviour
 
     public void StartClient()
     {
-        //Unity.Netcode.NetworkManager.Singleton.StartClient();
-        //TODO::コードがうまく取得できていない
-        string code = codeInputField.text;
+        //Unity.Netcode.NetworkManager.Singleton.StartClient();        string code = codeInputField.text;
         code.Substring(0, 6);
         UTJ.NetcodeGameObjectSample.RelayServiceUtility.StartClientUnityRelayModeAsync(code);
     }
@@ -33,7 +31,7 @@ public class HostClientButton : MonoBehaviour
     public void SuccessHost()
     {
         string code = UTJ.NetcodeGameObjectSample.RelayServiceUtility.HostJoinCode;
-        codeText.text += " " + code;
+        codeText.text = "Code: " + code;
         Debug.Log("ホストを立てました。");
         Debug.Log("コード　：　" + code);
     }
