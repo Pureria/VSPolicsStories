@@ -9,15 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6719689b8cb8c3e49979229d91f29083, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: ce3c976354862d44299a0b38ebbd18cc, type: 3}
+  m_Name: PlayerSpriteData
   m_EditorClassIdentifier: 
-  maxHP: 3
-  moveSpeed: 2.4
-  runSpeed: 2.5
-  shotMoveSpeed: 1.5
-  reloadMoveSpeed: 1.5
-  meleeDamage: 50
-  meleeDistance: 5
-  interactLayerName: interact
-  interactDistance: 5
+  player1: {fileID: 21300000, guid: 3064b722a9b9de54eb59196e0d4b3193, type: 3}
+  player2: {fileID: 21300000, guid: c1a582f973a0bee48b2a0f956a2f6a04, type: 3}

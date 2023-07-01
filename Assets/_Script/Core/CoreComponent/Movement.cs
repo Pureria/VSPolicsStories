@@ -19,47 +19,54 @@ public class Movement : CoreComponent
 
         myRB = GetComponentInParent<Rigidbody>();
         CanSetVelocity = true;
-        SetInitVariablesServerRpc();
+        //SetInitVariables();
     }
 
     public override void LogicUpdate()
     {
         CurrentVelocity = myRB.velocity;
+        //SetPositionServerRpc(myTran.position);
     }
 
     #region Set Function
-    [Unity.Netcode.ServerRpc]
-    public void SetVelocityZeroServerRpc()
+    public void SetVelocityZero()
     {
         workspace = Vector3.zero;
         SetFinalVelocity();
     }
 
-    [Unity.Netcode.ServerRpc]
-    public void SetVelocityServerRpc(Vector3 velocity, float speed)
+    public void SetVelocity(Vector3 velocity, float speed)
     {
         workspace = velocity.normalized * speed;
         SetFinalVelocity();
     }
 
-    [Unity.Netcode.ServerRpc]
-    private void SetInitVariablesServerRpc()
-    {
-        myRB = GetComponentInParent<Rigidbody>();
-        CanSetVelocity = true;
-    }
 
     private void SetFinalVelocity()
     {
-        if(IsServer)
+        if (CanSetVelocity)
         {
-            if (CanSetVelocity)
-            {
-                myRB.velocity = workspace;
-                CurrentVelocity = workspace;
-            }
+            myRB.velocity = workspace;
+            CurrentVelocity = workspace;
         }
     }
 
+    /*
+    [Unity.Netcode.ServerRpc]
+    private void SetInitVariables()
+    {
+        myRB = GetComponentInParent<Rigidbody>();
+        myTran = GetComponentInParent<Transform>();
+        CanSetVelocity = true;
+    }
+    */
+
+    /*
+    [Unity.Netcode.ServerRpc]
+    private void SetPositionServerRpc(Vector3 pos)
+    {
+        myTran.position = pos;
+    }
+    */
     #endregion
 }

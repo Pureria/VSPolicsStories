@@ -9,8 +9,8 @@ public class CoreComponent :  NetworkBehaviour, ILogicUpdate
 
     protected virtual void Start()
     {
-        if (!this.IsOwner)
-            return;
+        //if (!this.IsOwner)
+            //return;
 
         core = transform.parent.GetComponent<Core>();
 

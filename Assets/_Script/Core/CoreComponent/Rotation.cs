@@ -19,7 +19,6 @@ public class Rotation : CoreComponent
 
         myTran = transform.parent.parent;
         CanSetRotate = true;
-        SetInitVariablesServerRpc();
     }
 
     public override void LogicUpdate()
@@ -28,48 +27,33 @@ public class Rotation : CoreComponent
     }
 
     #region Set Function
-    [Unity.Netcode.ServerRpc]
-    public void SetRotationServerRpc(Vector3 look)
+    public void SetRotation(Vector3 look)
     {
         workspace = look;
         SetFinalRotation();
     }
 
-    [Unity.Netcode.ServerRpc]
-    public void SetRotationServerRpc(float angle)
+    public void SetRotation(float angle)
     {
         workspace = new Vector3(0.0f, angle, 0.0f);
         SetFinalRotateAngle();
     }
 
-    [Unity.Netcode.ServerRpc]
-    private void SetInitVariablesServerRpc()
-    {
-        myTran = transform.parent.parent;
-        CanSetRotate = true;
-    }
-
     private void SetFinalRotation()
     {
-        if(IsServer)
+        if (CanSetRotate)
         {
-            if (CanSetRotate)
-            {
-                myTran.LookAt(workspace);
-                CurrentRotate = workspace;
-            }
+            myTran.LookAt(workspace);
+            CurrentRotate = workspace;
         }
     }
 
     private void SetFinalRotateAngle()
     {
-        if(IsServer)
+        if (CanSetRotate)
         {
-            if (CanSetRotate)
-            {
-                myTran.Rotate(workspace);
-                CurrentRotate = workspace;
-            }
+            myTran.Rotate(workspace);
+            CurrentRotate = workspace;
         }
     }
     #endregion

@@ -6,12 +6,6 @@ using UnityEngine;
 
 public class PlayerCinemachine : NetworkBehaviour
 {
-    private enum playerNumber
-    {
-        player1,
-        player2,
-    }
-
     private CinemachineVirtualCamera _camera;
 
     private void Start()

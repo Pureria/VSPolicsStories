@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Netcode;
+﻿using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : NetworkBehaviour , INetworkSerializable
 {
     #region State Variables
     public PlayerStateMachine stateMachine { get; private set; }
@@ -25,16 +23,27 @@ public class PlayerController : NetworkBehaviour
 
     public Movement Movement { get => movement ?? Core.GetCoreComponent(ref movement); }
     public Rotation Rotation { get => rotation ?? Core.GetCoreComponent(ref rotation); }
+    public Damage Damage { get => damage ?? Core.GetCoreComponent(ref damage); }
+    public States States { get => states ?? Core.GetCoreComponent(ref states); }
 
     private Movement movement;
     private Rotation rotation;
-    //public Inventory Inventory { get; private set; }
-    //public GameObject mainWeapon { get; private set; }
-    //public Gun gun { get; private set; }
-    //public FunSearch search { get; private set; }
+    private Damage damage;
+    private States states;
     #endregion
 
     #region Other Variables
+    [SerializeField]
+    private string myControllPlayerLayer;
+    [SerializeField]
+    private string playerBlindLayer;
+    [SerializeField]
+    private string playerShowLayer;
+    [SerializeField]
+    private GameObject spriteObject;
+    [SerializeField]
+    private GameObject playerViewObject;
+
     public static PlayerController Owner = null;
 
     private Vector3 workspace;
@@ -44,6 +53,24 @@ public class PlayerController : NetworkBehaviour
 
     public bool isHaveMainWeapon;
     public int nowHaveGadget = 0;
+
+    public enum Team
+    {
+        RedTeam,
+        BlueTeam,
+        None
+    }
+
+    public Team nowTeam = Team.None;
+
+    public int nowHP;
+    #endregion
+
+    #region Network
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        //serializer.SerializeValue(ref workspace);
+    }
     #endregion
 
     #region Unity Callback Function
@@ -53,14 +80,19 @@ public class PlayerController : NetworkBehaviour
 
     private void Start()
     {
-        if (!this.IsOwner)
-            return;
-        else
-            Owner = this;
+        //共通処理
+        Core = GetComponentInChildren<Core>();
 
+        if (!this.IsOwner)
+        {
+            gameObject.layer = LayerMask.NameToLayer(playerBlindLayer);
+            return;
+        }
+
+        Owner = this;
+        gameObject.layer = LayerMask.NameToLayer(myControllPlayerLayer);
         SetPlayerNameServerRpc(this.IsServer);
 
-        Core = GetComponentInChildren<Core>();
         stateMachine = new PlayerStateMachine();
 
         IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
@@ -75,14 +107,56 @@ public class PlayerController : NetworkBehaviour
         Anim = GetComponent<Animator>();
 
         stateMachine.Initialize(IdleState);
-        SetPlayerServerRpc();
+        SetPlyerServerRpc(); 
     }
 
     private void Update()
     {
-        if (!this.IsOwner)
-            return;
+        //共通処理
+        switch (nowTeam)
+        {
+            case Team.RedTeam:
+                SetPlayerSprite(GameManagerControll.Singleton?.GetPlayer1Sprite());
+                break;
 
+            case Team.BlueTeam:
+                SetPlayerSprite(GameManagerControll.Singleton?.GetPlayer2Sprite());
+                break;
+
+            default:
+                break;
+        }
+
+        if (gameObject.layer == LayerMask.NameToLayer(playerBlindLayer) || gameObject.layer == LayerMask.NameToLayer(playerShowLayer))
+        {
+            spriteObject.layer = gameObject.layer;
+            playerViewObject.SetActive(false);
+        }
+
+        if (Damage.isDamage)
+        {
+            Damage?.UseDamageFlg();
+            States?.addDamage(Damage.currentDamage);
+            SetStatesServerRpc(States.nowHP);
+        }
+
+        if (!States.setInitFunction)
+        {
+            States?.InitState(playerData.maxHP);
+            SetStatesServerRpc(States.nowHP);
+        }
+
+        if (!this.IsOwner)
+        {
+            //デバッグ用
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                Damage?.addDamage(1);
+            }
+            return;
+        }
+
+        //オーナー処理
         Core.LogicUpdate();
         stateMachine.CurrentState.LogicUpdate();
 
@@ -92,7 +166,13 @@ public class PlayerController : NetworkBehaviour
         if (plane.Raycast(ray, out distance))
         {
             Vector3 lookpoint = ray.GetPoint(distance);
-            Rotation.SetRotationServerRpc(lookpoint);
+            Rotation.SetRotation(lookpoint);
+        }
+
+        //デバッグ用
+        if(Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Damage?.addDamage(1);
         }
     }
 
@@ -147,7 +227,7 @@ public class PlayerController : NetworkBehaviour
     }
 
     [Unity.Netcode.ServerRpc]
-    private void SetPlayerServerRpc()
+    private void SetPlyerServerRpc()
     {
         GameManagerControll.Singleton?.PlayerSet(this, transform);
     }
@@ -160,5 +240,47 @@ public class PlayerController : NetworkBehaviour
         else
             this.gameObject.name = "Player(Client)";
     }
+
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    private void SetStatesServerRpc(int nowHP)
+    {
+        GameManagerControll.Singleton?.PlayerSetHP(this, nowHP);
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void SetInitPositionClientRpc(Vector3 pos)
+    {
+        transform.position = pos;
+    }
+
+    /*
+    [Unity.Netcode.ClientRpc]
+    public void SetPlayerSpriteClientRpc(Sprite sprite)
+    {
+        SetPlayerSprite(sprite);
+    }
+    */
+
+    [Unity.Netcode.ClientRpc]
+    public void SetTeamClientRpc(Team team)
+    {
+        nowTeam = team;
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void SetNowHpClientRpc(int nowHp)
+    {
+        States?.SetNowHp(nowHp);
+        this.nowHP = States.nowHP;
+    }
+
+    public void SetPlayerSprite(Sprite sprite)
+    {
+        SpriteRenderer playerSprite = spriteObject.GetComponent<SpriteRenderer>();
+        playerSprite.sprite = sprite;
+    }
+
+    public string GetPlayerBlindLayerName() => playerBlindLayer;
+    public string GetPlayerShowLayerName() => playerShowLayer;
     #endregion
 }

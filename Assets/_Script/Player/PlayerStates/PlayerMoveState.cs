@@ -38,6 +38,6 @@ public class PlayerMoveState : PlayerState
         base.PhysicsUpdate();
 
         workspace = new Vector3(xInput, 0, zInput);
-        Movement?.SetVelocityServerRpc(workspace, playerData.moveSpeed);
+        Movement?.SetVelocity(workspace, playerData.moveSpeed);
     }
 }

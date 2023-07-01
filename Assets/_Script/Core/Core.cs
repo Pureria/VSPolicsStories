@@ -13,7 +13,7 @@ public class Core : NetworkBehaviour
         if (this.IsOwner)
             this.gameObject.name = "Core(Host)";
         else
-            this.gameObject.name = "Core(Client";
+            this.gameObject.name = "Core(Client)";
     }
 
     public void LogicUpdate()
@@ -34,10 +34,6 @@ public class Core : NetworkBehaviour
 
         if (comp == null)
             Debug.LogWarning($"{typeof(T)} Ç™ {transform.parent.name}Å@Ç…å©Ç¬Ç©ÇËÇ‹ÇπÇÒÅB");
-        else if(!this.IsOwner)
-        {
-            comp = null;
-        }
 
         return comp;
     }
