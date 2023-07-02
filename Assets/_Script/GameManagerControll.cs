@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -15,11 +16,9 @@ public class GameManagerControll : NetworkBehaviour
     [SerializeField]
     private PlayerSpriteData playerSpriteData;
 
-    public PlayerController player1 { get; private set; }
-    public PlayerController player2 { get; private set; }
+    public PlayerController[] PlayerArray { get; private set; } = new PlayerController[2];
+    public bool isGameEnd { get; private set; }
 
-    public int Player1HP { get; private set; }
-    public int Player2HP { get; private set; }
 
     private void Awake()
     {
@@ -27,6 +26,8 @@ public class GameManagerControll : NetworkBehaviour
             Singleton = this;
         else
             GameObject.Destroy(this);
+
+        isGameEnd = false;
     }
 
     private void Update()
@@ -46,19 +47,19 @@ public class GameManagerControll : NetworkBehaviour
 
     public void PlayerSet(PlayerController player, Transform tran)
     {
-        if (player1 == null)
+        if (PlayerArray[0] == null)
         {
-            player1 = player;
+            PlayerArray[0] = player;
             //tran.position = new Vector3(0.0f, 1.6f, -4.5f);
-            player1.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
-            player1.SetTeamClientRpc(PlayerController.Team.RedTeam);
+            PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
+            PlayerArray[0].SetTeamClientRpc(PlayerController.Team.RedTeam);
         }
         else
         {
-            player2 = player;
+            PlayerArray[1] = player;
             //tran.position = new Vector3(0, 1.6f, 0);
-            player2.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
-            player2.SetTeamClientRpc(PlayerController.Team.BlueTeam);
+            PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+            PlayerArray[1].SetTeamClientRpc(PlayerController.Team.BlueTeam);
         }
     }
 
@@ -70,13 +71,27 @@ public class GameManagerControll : NetworkBehaviour
 
     public void PlayerSetHP(PlayerController player,int nowHP)
     {
-        if (player == player1)
+        /*
+        if (player == PlayerArray[0])
             Player1HP = nowHP;
-        else if (player == player2)
+        else if (player == PlayerArray[1])
             Player2HP = nowHP;
+        */
 
-        player.SetNowHpClientRpc(nowHP);
-        Debug.Log(player.name + "‚ÌHP‚Í " + nowHP + " ‚Å‚·");
+        if(player == PlayerArray[0] || player == PlayerArray[1])
+        {
+            player.SetNowHpClientRpc(nowHP);
+            Debug.Log(player.name + "‚ÌHP‚Í " + nowHP + " ‚Å‚·");
+
+            if(nowHP <= 0)
+            {
+                //HP‚ª‚È‚­‚È‚Á‚½Žž‚Ìˆ—
+                for(int i = 0;i<PlayerArray.Length;i++)
+                {
+                    PlayerArray[i].PlayerGameEndClientRpc();
+                }
+            }
+        }
     }
 
     public Sprite GetPlayer1Sprite()
@@ -93,7 +108,7 @@ public class GameManagerControll : NetworkBehaviour
 
     public void SetAllPlayerInitLocation()
     {
-        player1.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
-        player2.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+        PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
+        PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
     }
 }

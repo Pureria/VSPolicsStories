@@ -13,6 +13,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     public PlayerIdleState IdleState { get; private set; }
     public PlayerMoveState MoveState { get; private set; }
     public PlayerShotState ShotState { get; private set; }
+    public PlayerIsGameEndState IsGameEndState { get; private set; }
     #endregion
 
     #region Component
@@ -65,6 +66,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     public Team nowTeam = Team.None;
 
     public int nowHP;
+    private bool isGameEnd;
     #endregion
 
     #region Network
@@ -83,6 +85,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     {
         //共通処理
         Core = GetComponentInChildren<Core>();
+        isGameEnd = false;
 
         if (!this.IsOwner)
         {
@@ -99,6 +102,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
         MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
         ShotState = new PlayerShotState(this, stateMachine, playerData, "shot");
+        IsGameEndState = new PlayerIsGameEndState(this, stateMachine, playerData, "isGameEnd");
 
         myRB = GetComponent<Rigidbody>();
         myColl = GetComponent<CapsuleCollider>();
@@ -157,6 +161,11 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         }
 
         //オーナー処理
+        if(isGameEnd && stateMachine.CurrentState != IsGameEndState)
+        {
+            stateMachine.ChangeState(IsGameEndState);
+        }
+
         Core.LogicUpdate();
         stateMachine.CurrentState.LogicUpdate();
 
@@ -279,6 +288,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     {
         States?.SetNowHp(nowHp);
         this.nowHP = States.nowHP;
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void PlayerGameEndClientRpc()
+    {
+        isGameEnd = true;
     }
 
     public void SetPlayerSprite(Sprite sprite)
