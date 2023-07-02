@@ -137,7 +137,7 @@ Light:
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -576,6 +576,8 @@ MonoBehaviour:
   playerViewObject: {fileID: 1676305561}
   isHaveMainWeapon: 0
   nowHaveGadget: 0
+  nowTeam: 2
+  nowHP: 0
 --- !u!114 &9212075728853757984
 MonoBehaviour:
   m_ObjectHideFlags: 0

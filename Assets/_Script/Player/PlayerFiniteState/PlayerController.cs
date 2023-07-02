@@ -138,6 +138,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             Damage?.UseDamageFlg();
             States?.addDamage(Damage.currentDamage);
             SetStatesServerRpc(States.nowHP);
+            SetAllPlayerInitLocationServerRpc();
         }
 
         if (!States.setInitFunction)
@@ -245,6 +246,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     private void SetStatesServerRpc(int nowHP)
     {
         GameManagerControll.Singleton?.PlayerSetHP(this, nowHP);
+    }
+
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    private void SetAllPlayerInitLocationServerRpc()
+    {
+        GameManagerControll.Singleton?.SetAllPlayerInitLocation();
     }
 
     [Unity.Netcode.ClientRpc]

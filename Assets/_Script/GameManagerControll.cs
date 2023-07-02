@@ -90,4 +90,10 @@ public class GameManagerControll : NetworkBehaviour
         Sprite ret = playerSpriteData.player2;
         return ret;
     }
+
+    public void SetAllPlayerInitLocation()
+    {
+        player1.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
+        player2.SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+    }
 }
