@@ -17,7 +17,8 @@ public class GameManagerControll : NetworkBehaviour
     private PlayerSpriteData playerSpriteData;
 
     public PlayerController[] PlayerArray { get; private set; } = new PlayerController[2];
-    private bool[] PlayerRestartInput = new bool[2];
+    private bool[] PlayerDeadFlg;
+    private bool[] PlayerRestartInput;
     public bool isGameEnd { get; private set; }
 
 
@@ -29,8 +30,15 @@ public class GameManagerControll : NetworkBehaviour
             GameObject.Destroy(this);
 
         isGameEnd = false;
-        for (int i = 0; i < PlayerRestartInput.Length; i++)
+
+        PlayerDeadFlg = new bool[PlayerArray.Length];
+        PlayerRestartInput = new bool[PlayerArray.Length];
+
+        for (int i = 0; i < PlayerArray.Length; i++)
+        {
             PlayerRestartInput[i] = false;
+            PlayerDeadFlg[i] = false;
+        }
     }
 
     private void Update()
@@ -55,6 +63,28 @@ public class GameManagerControll : NetworkBehaviour
                 {
                     //TODO::リスタート処理
                     Debug.Log("全員がリスタートを選択しました");
+                    isGameEnd = false;
+                    PlayerController[] oldPlayer = new PlayerController[PlayerArray.Length];
+                    for(int i= 0;i<PlayerArray.Length;i++)
+                    {
+                        oldPlayer[i] = PlayerArray[i];
+                        PlayerArray[i] = null;
+                        PlayerRestartInput[i] = false;
+                        PlayerDeadFlg[i] = false;
+                    }
+
+                    for(int i = 0;i<oldPlayer.Length;i++)
+                    {
+                        oldPlayer[i].RestartClientRpc();
+                    }
+                }
+            }
+            else
+            {
+                for(int i = 0;i<PlayerDeadFlg.Length;i++)
+                {
+                    if (PlayerDeadFlg[i])
+                        isGameEnd = true;
                 }
             }
         }
@@ -80,12 +110,6 @@ public class GameManagerControll : NetworkBehaviour
         }
     }
 
-    [Unity.Netcode.ClientRpc]
-    public void SetPlayerClientRpc(PlayerController player1,PlayerController player2)
-    {
-
-    }
-
     public void PlayerSetHP(PlayerController player,int nowHP)
     {
         /*
@@ -100,6 +124,7 @@ public class GameManagerControll : NetworkBehaviour
             player.SetNowHpClientRpc(nowHP);
             Debug.Log(player.name + "のHPは " + nowHP + " です");
 
+            /*
             if(nowHP <= 0)
             {
                 isGameEnd = true;
@@ -109,6 +134,7 @@ public class GameManagerControll : NetworkBehaviour
                     PlayerArray[i].PlayerGameEndClientRpc();
                 }
             }
+            */
         }
     }
 
@@ -128,6 +154,23 @@ public class GameManagerControll : NetworkBehaviour
     {
         PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
         PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+    }
+
+    public void SetPlayerDead(PlayerController player)
+    {
+        for(int i = 0;i<PlayerArray.Length;i++)
+        {
+            if (PlayerArray[i] == player && !PlayerDeadFlg[i])
+            {
+                Debug.Log(player.name + "の負けです。");
+                PlayerDeadFlg[i] = true;
+                //HPがなくなった時の処理
+                for (int j = 0; j < PlayerArray.Length; j++)
+                {
+                    PlayerArray[j].PlayerGameEndClientRpc();
+                }
+            }
+        }
     }
 
     public void RestartMessage(PlayerController player)

@@ -139,15 +139,21 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         if (Damage.isDamage)
         {
             Damage?.UseDamageFlg();
-            States?.addDamage(Damage.currentDamage);
-            SetStatesServerRpc(States.nowHP);
+            //States?.addDamage(Damage.currentDamage);
+            //SetStatesServerRpc(States.nowHP);
+            PlayerAddDamageClientRpc(Damage.currentDamage);
+            
             SetAllPlayerInitLocationServerRpc();
         }
 
-        if (!States.setInitFunction)
+        if(States != null)
         {
-            States?.InitState(playerData.maxHP);
-            SetStatesServerRpc(States.nowHP);
+            if (!States.setInitFunction)
+            {
+                States?.InitState(playerData.maxHP);
+                //SetStatesServerRpc(States.nowHP);
+                SetNowHpClientRpc(States.nowHP);
+            }
         }
 
         if (!this.IsOwner)
@@ -176,6 +182,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         {
             Vector3 lookpoint = ray.GetPoint(distance);
             Rotation.SetRotation(lookpoint);
+        }
+
+        //プレイヤーが死亡したらサーバー側のゲームマネージャーに伝える
+        if(States.isDead)
+        {
+            SetPlayerDeadServerRpc();
         }
 
         //デバッグ用
@@ -268,6 +280,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         GameManagerControll.Singleton?.RestartMessage(this);
     }
 
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void SetPlayerDeadServerRpc()
+    {
+        GameManagerControll.Singleton?.SetPlayerDead(this);
+    }
+
     [Unity.Netcode.ClientRpc]
     public void SetInitPositionClientRpc(Vector3 pos)
     {
@@ -300,6 +318,29 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     public void PlayerGameEndClientRpc()
     {
         isGameEnd = true;
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void RestartClientRpc()
+    {
+        if(IsOwner)
+        {
+            stateMachine.ChangeState(IdleState);
+            States?.InitState(playerData.maxHP);
+            isGameEnd = false;
+
+            SetPlyerServerRpc();
+        }
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void PlayerAddDamageClientRpc(int damage)
+    {
+        if(IsOwner)
+        {
+            States?.addDamage(damage);
+            SetNowHpClientRpc(States.nowHP);
+        }
     }
 
     public void SetPlayerSprite(Sprite sprite)
