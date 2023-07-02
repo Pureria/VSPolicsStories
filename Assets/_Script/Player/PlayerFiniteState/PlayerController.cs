@@ -12,6 +12,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
 
     public PlayerIdleState IdleState { get; private set; }
     public PlayerMoveState MoveState { get; private set; }
+    public PlayerShotState ShotState { get; private set; }
     #endregion
 
     #region Component
@@ -97,6 +98,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
 
         IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
         MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
+        ShotState = new PlayerShotState(this, stateMachine, playerData, "shot");
 
         //デバッグ用
         transform.position = new Vector3(transform.position.x,transform.position.y + 0.2f,transform.position.z);
