@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerIsGameEndState : PlayerState
 {
+    private bool isResetPush = false;
     public PlayerIsGameEndState(PlayerController player, PlayerStateMachine stateMachine, PlayerData playerData, string animBoolName) : base(player, stateMachine, playerData, animBoolName)
     {
 
@@ -21,6 +22,8 @@ public class PlayerIsGameEndState : PlayerState
         Movement?.SetVelocityZero();
         Movement.CanSetVelocity = false;
         Rotation.CanSetRotate = false;
+
+        isResetPush = false;
     }
 
     public override void Exit()
@@ -34,6 +37,14 @@ public class PlayerIsGameEndState : PlayerState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
+
+        if(!isResetPush && reloadInput)
+        {
+            player.inputController.UseReloadInput();
+            isResetPush = true;
+
+            player.RestartMessageServerRpc();
+        }
     }
 
     public override void PhysicsUpdate()

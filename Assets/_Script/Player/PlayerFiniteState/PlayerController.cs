@@ -262,6 +262,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         GameManagerControll.Singleton?.SetAllPlayerInitLocation();
     }
 
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void RestartMessageServerRpc()
+    {
+        GameManagerControll.Singleton?.RestartMessage(this);
+    }
+
     [Unity.Netcode.ClientRpc]
     public void SetInitPositionClientRpc(Vector3 pos)
     {

@@ -17,6 +17,7 @@ public class GameManagerControll : NetworkBehaviour
     private PlayerSpriteData playerSpriteData;
 
     public PlayerController[] PlayerArray { get; private set; } = new PlayerController[2];
+    private bool[] PlayerRestartInput = new bool[2];
     public bool isGameEnd { get; private set; }
 
 
@@ -28,6 +29,8 @@ public class GameManagerControll : NetworkBehaviour
             GameObject.Destroy(this);
 
         isGameEnd = false;
+        for (int i = 0; i < PlayerRestartInput.Length; i++)
+            PlayerRestartInput[i] = false;
     }
 
     private void Update()
@@ -40,6 +43,20 @@ public class GameManagerControll : NetworkBehaviour
         else
         {
             //サーバーの時の処理
+            if(isGameEnd)
+            {
+                bool flg = true;
+                for(int i = 0;i<PlayerRestartInput.Length;i++)
+                {
+                    if (!PlayerRestartInput[i])
+                        flg = false;
+                }
+                if(flg)
+                {
+                    //TODO::リスタート処理
+                    Debug.Log("全員がリスタートを選択しました");
+                }
+            }
         }
 
 
@@ -85,6 +102,7 @@ public class GameManagerControll : NetworkBehaviour
 
             if(nowHP <= 0)
             {
+                isGameEnd = true;
                 //HPがなくなった時の処理
                 for(int i = 0;i<PlayerArray.Length;i++)
                 {
@@ -110,5 +128,17 @@ public class GameManagerControll : NetworkBehaviour
     {
         PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
         PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+    }
+
+    public void RestartMessage(PlayerController player)
+    {
+        for(int i = 0;i< PlayerArray.Length;i++)
+        {
+            if (PlayerArray[i] == player)
+            {
+                PlayerRestartInput[i] = true;
+                Debug.Log(player.name + "のリスタートを受け付けました");
+            }
+        }
     }
 }
