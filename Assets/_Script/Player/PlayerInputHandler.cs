@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputHandler : MonoBehaviour
+public class PlayerInputHandler : Unity.Netcode.NetworkBehaviour
 {
     private PlayerInput playerInput;
     private Camera cam;
@@ -40,19 +40,28 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void Start()
     {
+        if (!this.IsOwner)
+            return;
+
         playerInput = GetComponent<PlayerInput>();
         cam = Camera.main;
     }
 
     private void Update()
     {
-        CheckReloadInputHoldTime();
-        CheckMeleeInputHoldTime();
-        CheckInteractInputHoldTime();
+        if(this.IsOwner)
+        {
+            CheckReloadInputHoldTime();
+            CheckMeleeInputHoldTime();
+            CheckInteractInputHoldTime();
+        }
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         RawMovementInput = context.ReadValue<Vector3>();
 
         //Debug.Log(RawMovementInput);
@@ -63,6 +72,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnReloadInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
         {
             ReloadInput = true;
@@ -78,6 +90,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnMeleeInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
         {
             MeleeInput = true;
@@ -93,6 +108,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnDashInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
             DashInput = true;
 
@@ -102,12 +120,18 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnMousePosition(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         Vector2 vec = new Vector2(context.ReadValue<Vector2>().x + compensateMosePos.x, context.ReadValue<Vector2>().y + compensateMosePos.y);
         MousePosition = vec;
     }
 
     public void OnShotInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
             ShotInput = true;
 
@@ -117,6 +141,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnInteractInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
         {
             InteractInput = true;
@@ -132,6 +159,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnInventoryInput(InputAction.CallbackContext context)
     {
+        if (!this.IsOwner)
+            return;
+
         if (context.started)
             InventoryInput = true;
 

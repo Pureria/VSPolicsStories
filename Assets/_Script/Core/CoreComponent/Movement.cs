@@ -10,17 +10,22 @@ public class Movement : CoreComponent
 
     private Vector3 workspace;
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
-        myRB = GetComponentInParent<Rigidbody>();
+        base.Start();
 
+        if (!this.IsOwner)
+            return;
+
+        myRB = GetComponentInParent<Rigidbody>();
         CanSetVelocity = true;
+        //SetInitVariables();
     }
 
     public override void LogicUpdate()
     {
         CurrentVelocity = myRB.velocity;
+        //SetPositionServerRpc(myTran.position);
     }
 
     #region Set Function
@@ -36,6 +41,7 @@ public class Movement : CoreComponent
         SetFinalVelocity();
     }
 
+
     private void SetFinalVelocity()
     {
         if (CanSetVelocity)
@@ -45,5 +51,22 @@ public class Movement : CoreComponent
         }
     }
 
+    /*
+    [Unity.Netcode.ServerRpc]
+    private void SetInitVariables()
+    {
+        myRB = GetComponentInParent<Rigidbody>();
+        myTran = GetComponentInParent<Transform>();
+        CanSetVelocity = true;
+    }
+    */
+
+    /*
+    [Unity.Netcode.ServerRpc]
+    private void SetPositionServerRpc(Vector3 pos)
+    {
+        myTran.position = pos;
+    }
+    */
     #endregion
 }

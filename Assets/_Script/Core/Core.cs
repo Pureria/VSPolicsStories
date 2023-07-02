@@ -2,10 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Unity.Netcode;
 
-public class Core : MonoBehaviour
+public class Core : NetworkBehaviour
 {
     public List<CoreComponent> CoreComponents { get; private set; } = new List<CoreComponent>();
+
+    private void Start()
+    {
+        if (this.IsOwner)
+            this.gameObject.name = "Core(Host)";
+        else
+            this.gameObject.name = "Core(Client)";
+    }
 
     public void LogicUpdate()
     {

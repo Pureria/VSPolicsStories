@@ -11,9 +11,12 @@ public class Rotation : CoreComponent
 
     private Vector3 workspace;
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
+        if (!this.IsOwner)
+            return;
+
         myTran = transform.parent.parent;
         CanSetRotate = true;
     }
