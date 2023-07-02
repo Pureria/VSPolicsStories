@@ -100,16 +100,13 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
         ShotState = new PlayerShotState(this, stateMachine, playerData, "shot");
 
-        //デバッグ用
-        transform.position = new Vector3(transform.position.x,transform.position.y + 0.2f,transform.position.z);
-
         myRB = GetComponent<Rigidbody>();
         myColl = GetComponent<CapsuleCollider>();
         inputController = GetComponent<PlayerInputHandler>();
         Anim = GetComponent<Animator>();
 
         stateMachine.Initialize(IdleState);
-        SetPlyerServerRpc(); 
+        SetPlyerServerRpc();
     }
 
     private void Update()
@@ -275,6 +272,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     {
         nowTeam = team;
     }
+
 
     [Unity.Netcode.ClientRpc]
     public void SetNowHpClientRpc(int nowHp)
