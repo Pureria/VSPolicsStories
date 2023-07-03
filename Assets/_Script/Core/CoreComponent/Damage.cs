@@ -6,10 +6,12 @@ public class Damage : CoreComponent
 {
     public bool isDamage { get; private set; }
     public int currentDamage { get; private set; }
+    public bool canDamage { get; private set; }
 
     protected override void Awake()
     {
         base.Awake();
+        canDamage = false;
     }
 
     public override void LogicUpdate()
@@ -20,10 +22,14 @@ public class Damage : CoreComponent
     #region SetFunction
     public void addDamage(int damage)
     {
-        isDamage = true;
-        currentDamage = damage;
+        if(canDamage)
+        {
+            isDamage = true;
+            currentDamage = damage;
+        }
     }
 
     public void UseDamageFlg() => isDamage = false;
+    public void SetCanDamage(bool flg) => canDamage = flg;
     #endregion
 }

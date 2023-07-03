@@ -15,11 +15,19 @@ public class GameManagerControll : NetworkBehaviour
     private bool[] PlayerDeadFlg;
     private bool[] PlayerRestartInput;
     public bool isGameEnd { get; private set; }
+    public bool isGameNow { get; private set; }
 
     //TODO::この書き方はプレイヤーがHP3固定の場合にのみちゃんと動きます
     //HPを可変にするにはスライダー等でUIを作成してください
     private int RedTeamCount = 0;
     private int BlueTeamCount = 0;
+
+    [SerializeField]
+    private Transform LobbyTransform;
+    [SerializeField]
+    private Transform RedTeamSpawnTransform;
+    [SerializeField]
+    private Transform BlueTeamSpawnTransform;
 
     private void Awake()
     {
@@ -96,10 +104,36 @@ public class GameManagerControll : NetworkBehaviour
                     }
                 }
             }
+
+            //ゲーム中じゃない場合
+            if(!isGameNow)
+            {
+                //プレイヤーが二人決まった時点でゲーム開始
+                bool flg = true;
+                foreach(PlayerController player in PlayerArray)
+                {
+                    if (player == null)
+                        flg = false;
+                }
+
+                if(flg)
+                {
+                    PlayerArray[0].SetPositionClientRpc(RedTeamSpawnTransform.position);
+                    PlayerArray[1].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+
+                    PlayerArray[0].StartClientRpc();
+                    PlayerArray[1].StartClientRpc();
+
+                    PlayerArray[0].SetIsGameNowClientRpc(true);
+                    PlayerArray[1].SetIsGameNowClientRpc(true);
+                    isGameNow = true;
+                }
+
+            }
         }
 
-        Debug.Log("赤チームの得点　：" + RedTeamCount);
-        Debug.Log("青チームの得点　：" + BlueTeamCount);
+        //Debug.Log("赤チームの得点　：" + RedTeamCount);
+        //Debug.Log("青チームの得点　：" + BlueTeamCount);
     }
 
     public void PlayerSet(PlayerController player, Transform tran)
@@ -108,14 +142,14 @@ public class GameManagerControll : NetworkBehaviour
         {
             PlayerArray[0] = player;
             //tran.position = new Vector3(0.0f, 1.6f, -4.5f);
-            PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
+            //PlayerArray[0].SetPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
             PlayerArray[0].SetTeamClientRpc(PlayerController.Team.RedTeam);
         }
         else
         {
             PlayerArray[1] = player;
             //tran.position = new Vector3(0, 1.6f, 0);
-            PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+            //PlayerArray[1].SetPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
             PlayerArray[1].SetTeamClientRpc(PlayerController.Team.BlueTeam);
         }
     }
@@ -162,8 +196,8 @@ public class GameManagerControll : NetworkBehaviour
 
     public void SetAllPlayerInitLocation()
     {
-        PlayerArray[0].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, -4.5f));
-        PlayerArray[1].SetInitPositionClientRpc(new Vector3(0.0f, 0.4f, 0.0f));
+        PlayerArray[0].SetPositionClientRpc(RedTeamSpawnTransform.position);
+        PlayerArray[1].SetPositionClientRpc(BlueTeamSpawnTransform.position);
     }
 
     public void SetPlayerDead(PlayerController player)
@@ -207,6 +241,11 @@ public class GameManagerControll : NetworkBehaviour
         }
 
         SetTeamCountClientRpc(RedTeamCount, BlueTeamCount);
+    }
+
+    public Vector3 GetLobbyPosition()
+    {
+        return LobbyTransform.position;
     }
 
     [Unity.Netcode.ClientRpc]

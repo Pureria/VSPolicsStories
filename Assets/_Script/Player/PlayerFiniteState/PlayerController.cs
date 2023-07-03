@@ -70,6 +70,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
 
     public int nowHP;
     private bool isGameEnd;
+    private bool isGameNow;
     #endregion
 
     #region Network
@@ -112,7 +113,8 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         inputController = GetComponent<PlayerInputHandler>();
         Anim = GetComponent<Animator>();
 
-        SetPlyerServerRpc();
+        //SetPlayerServerRpc();
+        SetPlayerPositionServerRpc(GameManagerControll.Singleton.GetLobbyPosition());
     }
 
     private void Update()
@@ -271,8 +273,8 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     }
 
     #region ServerRpc
-    [Unity.Netcode.ServerRpc]
-    private void SetPlyerServerRpc()
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void SetPlayerServerRpc()
     {
         GameManagerControll.Singleton?.PlayerSet(this, transform);
     }
@@ -327,10 +329,16 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     {
         GameManagerControll.Singleton?.AddTeamCount(nowTeam, addCount);
     }
+
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void SetPlayerPositionServerRpc(Vector3 pos)
+    {
+        SetPositionClientRpc(pos);
+    }
     #endregion
     #region ClientRpc
     [Unity.Netcode.ClientRpc]
-    public void SetInitPositionClientRpc(Vector3 pos)
+    public void SetPositionClientRpc(Vector3 pos)
     {
         transform.position = pos;
     }
@@ -380,7 +388,18 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             States?.InitState(playerData.maxHP);
             isGameEnd = false;
 
-            SetPlyerServerRpc();
+            SetPlayerServerRpc();
+        }
+    }    
+    
+    [Unity.Netcode.ClientRpc]
+    public void StartClientRpc()
+    {
+        if (IsOwner)
+        {
+            stateMachine.ChangeState(IdleState);
+            States?.InitState(playerData.maxHP);
+            isGameEnd = false;
         }
     }
 
@@ -393,6 +412,13 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             //SetNowHpClientRpc(States.nowHP);
             SetNowHpServerRpc(States.nowHP);
         }
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void SetIsGameNowClientRpc(bool flg)
+    {
+        isGameNow = flg;
+        Damage?.SetCanDamage(flg);
     }
     #endregion
 
