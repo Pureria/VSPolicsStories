@@ -7,7 +7,7 @@ public class CoreComponent :  NetworkBehaviour, ILogicUpdate
 {
     protected Core core;
 
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         //if (!this.IsOwner)
             //return;
@@ -15,7 +15,7 @@ public class CoreComponent :  NetworkBehaviour, ILogicUpdate
         core = transform.parent.GetComponent<Core>();
 
         if (core == null) { Debug.LogError("Coreスクリプトが見つかりません。"); }
-        core.AddCoreComponent(this);
+        core?.AddCoreComponent(this);
     }
 
     public virtual void LogicUpdate() { }

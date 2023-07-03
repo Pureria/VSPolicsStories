@@ -10,15 +10,15 @@ public class Movement : CoreComponent
 
     private Vector3 workspace;
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
 
-        if (!this.IsOwner)
-            return;
+        //if (!this.IsOwner)
+            //return;
 
-        myRB = GetComponentInParent<Rigidbody>();
         CanSetVelocity = true;
+        myRB = GetComponentInParent<Rigidbody>();
         //SetInitVariables();
     }
 

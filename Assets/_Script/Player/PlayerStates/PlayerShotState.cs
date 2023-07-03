@@ -41,7 +41,11 @@ public class PlayerShotState : PlayerState
                 Damage damage = null;
                 pCore.GetCoreComponent(ref damage);
                 if (damage != null)
+                {
+                    //ダメージが入る処理
                     damage.addDamage(1);
+                    player.AddTeamCountServerRpc(player.nowTeam, 1);
+                }
                 else
                     Debug.Log(hit.collider.name + "のDamageコンポーネントが見つかりません");
             }

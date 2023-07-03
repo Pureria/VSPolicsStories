@@ -7,9 +7,9 @@ public class Damage : CoreComponent
     public bool isDamage { get; private set; }
     public int currentDamage { get; private set; }
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
     }
 
     public override void LogicUpdate()

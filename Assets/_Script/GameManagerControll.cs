@@ -7,11 +7,6 @@ using UnityEngine;
 public class GameManagerControll : NetworkBehaviour
 {
     public static GameManagerControll Singleton;
-    public enum playerNumber
-    {
-        player1,
-        player2,
-    }
 
     [SerializeField]
     private PlayerSpriteData playerSpriteData;
@@ -21,6 +16,10 @@ public class GameManagerControll : NetworkBehaviour
     private bool[] PlayerRestartInput;
     public bool isGameEnd { get; private set; }
 
+    //TODO::この書き方はプレイヤーがHP3固定の場合にのみちゃんと動きます
+    //HPを可変にするにはスライダー等でUIを作成してください
+    private int RedTeamCount = 0;
+    private int BlueTeamCount = 0;
 
     private void Awake()
     {
@@ -77,6 +76,9 @@ public class GameManagerControll : NetworkBehaviour
                     {
                         oldPlayer[i].RestartClientRpc();
                     }
+                    RedTeamCount = 0;
+                    BlueTeamCount = 0;
+                    SetTeamCountClientRpc(RedTeamCount, BlueTeamCount);
                 }
             }
             else
@@ -84,12 +86,20 @@ public class GameManagerControll : NetworkBehaviour
                 for(int i = 0;i<PlayerDeadFlg.Length;i++)
                 {
                     if (PlayerDeadFlg[i])
+                    {
                         isGameEnd = true;
+                        //HPがなくなった時の処理
+                        for (int j = 0; j < PlayerArray.Length; j++)
+                        {
+                            PlayerArray[j].PlayerGameEndClientRpc();
+                        }
+                    }
                 }
             }
         }
 
-
+        Debug.Log("赤チームの得点　：" + RedTeamCount);
+        Debug.Log("青チームの得点　：" + BlueTeamCount);
     }
 
     public void PlayerSet(PlayerController player, Transform tran)
@@ -164,11 +174,6 @@ public class GameManagerControll : NetworkBehaviour
             {
                 Debug.Log(player.name + "の負けです。");
                 PlayerDeadFlg[i] = true;
-                //HPがなくなった時の処理
-                for (int j = 0; j < PlayerArray.Length; j++)
-                {
-                    PlayerArray[j].PlayerGameEndClientRpc();
-                }
             }
         }
     }
@@ -183,5 +188,31 @@ public class GameManagerControll : NetworkBehaviour
                 Debug.Log(player.name + "のリスタートを受け付けました");
             }
         }
+    }
+
+    public void AddTeamCount(PlayerController.Team team,int addCount)
+    {
+        switch(team)
+        {
+            case PlayerController.Team.RedTeam:
+                RedTeamCount += addCount;
+                break;
+
+            case PlayerController.Team.BlueTeam:
+                BlueTeamCount += addCount;
+                break;
+
+            default:
+                break;
+        }
+
+        SetTeamCountClientRpc(RedTeamCount, BlueTeamCount);
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void SetTeamCountClientRpc(int redCount,int blueCount)
+    {
+        RedTeamCount = redCount;
+        BlueTeamCount = blueCount;
     }
 }

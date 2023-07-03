@@ -56,6 +56,9 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     public bool isHaveMainWeapon;
     public int nowHaveGadget = 0;
 
+    private bool isStackHP = false;
+    private int stackHP = 0;
+
     public enum Team
     {
         RedTeam,
@@ -109,7 +112,6 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         inputController = GetComponent<PlayerInputHandler>();
         Anim = GetComponent<Animator>();
 
-        stateMachine.Initialize(IdleState);
         SetPlyerServerRpc();
     }
 
@@ -141,19 +143,30 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             Damage?.UseDamageFlg();
             //States?.addDamage(Damage.currentDamage);
             //SetStatesServerRpc(States.nowHP);
-            PlayerAddDamageClientRpc(Damage.currentDamage);
+            //PlayerAddDamageClientRpc(Damage.currentDamage);
+            PlayerAddDamageServerRpc(Damage.currentDamage);
             
             SetAllPlayerInitLocationServerRpc();
         }
 
-        if(States != null)
+        if (!States.setInitFunction)
         {
-            if (!States.setInitFunction)
-            {
-                States?.InitState(playerData.maxHP);
-                //SetStatesServerRpc(States.nowHP);
-                SetNowHpClientRpc(States.nowHP);
-            }
+            States?.InitState(playerData.maxHP);
+            //SetStatesServerRpc(States.nowHP);
+            SetNowHpClientRpc(States.nowHP);
+        }
+
+        if(isStackHP && Core != null)
+        {
+            isStackHP = false;
+            States?.SetNowHp(stackHP);
+            this.nowHP = States.nowHP;
+        }
+
+        //デバッグ用
+        if (States != null)
+        {
+            Debug.Log(gameObject.name + "のHP : " + States.nowHP);
         }
 
         if (!this.IsOwner)
@@ -165,9 +178,13 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             }
             return;
         }
-
         //オーナー処理
-        if(isGameEnd && stateMachine.CurrentState != IsGameEndState)
+        if (stateMachine.CurrentState == null)
+            stateMachine.Initialize(IdleState);
+
+        //SetNowHpClientRpc(States.nowHP);
+
+        if (isGameEnd && stateMachine.CurrentState != IsGameEndState)
         {
             stateMachine.ChangeState(IsGameEndState);
         }
@@ -185,9 +202,14 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         }
 
         //プレイヤーが死亡したらサーバー側のゲームマネージャーに伝える
-        if(States.isDead)
+        if(States != null)
         {
-            SetPlayerDeadServerRpc();
+            if(States.isDead)
+            {
+                SetPlayerDeadServerRpc();
+            }
+
+            SetNowHpClientRpc(States.nowHP);
         }
 
         //デバッグ用
@@ -208,7 +230,8 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         if (!this.IsOwner)
             return;
 
-        stateMachine.CurrentState.PhysicsUpdate();
+        if(stateMachine.CurrentState != null)
+            stateMachine.CurrentState.PhysicsUpdate();
     }
     #endregion
 
@@ -247,6 +270,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         return false;
     }
 
+    #region ServerRpc
     [Unity.Netcode.ServerRpc]
     private void SetPlyerServerRpc()
     {
@@ -286,6 +310,25 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         GameManagerControll.Singleton?.SetPlayerDead(this);
     }
 
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void PlayerAddDamageServerRpc(int damage)
+    {
+        PlayerAddDamageClientRpc(damage);
+    }
+
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void SetNowHpServerRpc(int nowHp)
+    {
+        SetNowHpClientRpc(nowHp);
+    }
+
+    [Unity.Netcode.ServerRpc(RequireOwnership = false)]
+    public void AddTeamCountServerRpc(Team nowTeam,int addCount)
+    {
+        GameManagerControll.Singleton?.AddTeamCount(nowTeam, addCount);
+    }
+    #endregion
+    #region ClientRpc
     [Unity.Netcode.ClientRpc]
     public void SetInitPositionClientRpc(Vector3 pos)
     {
@@ -310,8 +353,16 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     [Unity.Netcode.ClientRpc]
     public void SetNowHpClientRpc(int nowHp)
     {
-        States?.SetNowHp(nowHp);
-        this.nowHP = States.nowHP;
+        if (Core != null)
+        {
+            States?.SetNowHp(nowHp);
+            this.nowHP = States.nowHP;
+        }
+        else
+        {
+            isStackHP = true;
+            stackHP = nowHp;
+        }
     }
 
     [Unity.Netcode.ClientRpc]
@@ -323,7 +374,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     [Unity.Netcode.ClientRpc]
     public void RestartClientRpc()
     {
-        if(IsOwner)
+        if (IsOwner)
         {
             stateMachine.ChangeState(IdleState);
             States?.InitState(playerData.maxHP);
@@ -336,12 +387,14 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     [Unity.Netcode.ClientRpc]
     public void PlayerAddDamageClientRpc(int damage)
     {
-        if(IsOwner)
+        if (IsOwner)
         {
             States?.addDamage(damage);
-            SetNowHpClientRpc(States.nowHP);
+            //SetNowHpClientRpc(States.nowHP);
+            SetNowHpServerRpc(States.nowHP);
         }
     }
+    #endregion
 
     public void SetPlayerSprite(Sprite sprite)
     {
