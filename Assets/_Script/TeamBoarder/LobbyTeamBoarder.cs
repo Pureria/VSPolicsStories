@@ -20,7 +20,7 @@ public class LobbyTeamBoarder : NetworkBehaviour
 
         player = other.GetComponent<PlayerController>();
 
-        if(player!= null)
+        if(playerÅ@!= null)
             onPlayer = true;
     }
 

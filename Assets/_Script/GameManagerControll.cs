@@ -79,7 +79,6 @@ public class GameManagerControll : NetworkBehaviour
                         PlayerRestartInput[i] = false;
                         PlayerDeadFlg[i] = false;
                     }
-
                     for(int i = 0;i<oldPlayer.Length;i++)
                     {
                         oldPlayer[i].RestartClientRpc();
@@ -118,8 +117,23 @@ public class GameManagerControll : NetworkBehaviour
 
                 if(flg)
                 {
-                    PlayerArray[0].SetPositionClientRpc(RedTeamSpawnTransform.position);
-                    PlayerArray[1].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+                    for (int i = 0; i < PlayerArray.Length; i++)
+                    {
+                        PlayerController.Team PT = PlayerArray[i].GetNowTeam();
+                        switch (PT)
+                        {
+                            case PlayerController.Team.RedTeam:
+                                PlayerArray[i].SetPositionClientRpc(RedTeamSpawnTransform.position);
+                                break;
+
+                            case PlayerController.Team.BlueTeam:
+                                PlayerArray[i].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
 
                     PlayerArray[0].StartClientRpc();
                     PlayerArray[1].StartClientRpc();
@@ -196,8 +210,23 @@ public class GameManagerControll : NetworkBehaviour
 
     public void SetAllPlayerInitLocation()
     {
-        PlayerArray[0].SetPositionClientRpc(RedTeamSpawnTransform.position);
-        PlayerArray[1].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+        for(int i = 0;i<PlayerArray.Length;i++)
+        {
+            PlayerController.Team PT = PlayerArray[i].GetNowTeam();
+            switch(PT)
+            {
+                case PlayerController.Team.RedTeam:
+                    PlayerArray[i].SetPositionClientRpc(RedTeamSpawnTransform.position);
+                    break;
+
+                case PlayerController.Team.BlueTeam:
+                    PlayerArray[i].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 
     public void SetPlayerDead(PlayerController player)

@@ -271,6 +271,16 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         }
         return false;
     }
+    public void SetPlayerSprite(Sprite sprite)
+    {
+        SpriteRenderer playerSprite = spriteObject.GetComponent<SpriteRenderer>();
+        playerSprite.sprite = sprite;
+    }
+
+    public Team GetNowTeam()
+    {
+        return nowTeam;
+    }
 
     #region ServerRpc
     [Unity.Netcode.ServerRpc(RequireOwnership = false)]
@@ -422,11 +432,6 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     }
     #endregion
 
-    public void SetPlayerSprite(Sprite sprite)
-    {
-        SpriteRenderer playerSprite = spriteObject.GetComponent<SpriteRenderer>();
-        playerSprite.sprite = sprite;
-    }
 
     public string GetPlayerBlindLayerName() => playerBlindLayer;
     public string GetPlayerShowLayerName() => playerShowLayer;
