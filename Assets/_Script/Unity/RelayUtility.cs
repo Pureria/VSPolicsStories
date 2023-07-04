@@ -100,7 +100,7 @@ namespace UTJ.NetcodeGameObjectSample
 
 
         #region CLIENT_CODE
-        public static async void StartClientUnityRelayModeAsync(string joinCode)
+        public static async void StartClientUnityRelayModeAsync(string joinCode,Action onSuccess, Action onFailed)
         {
             try
             {
@@ -120,10 +120,12 @@ namespace UTJ.NetcodeGameObjectSample
                 var (ipv4Address, port, allocationIdBytes, connectionData, hostConnectionData, key) = clientRelayUtilityTask.Result;
                 utp.SetRelayServerData(ipv4Address, port, allocationIdBytes, key, connectionData, hostConnectionData);
                 NetworkManager.Singleton.StartClient();
+                onSuccess();
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
+                onFailed();
             }
 
         }

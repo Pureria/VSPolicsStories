@@ -71,6 +71,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     public int nowHP;
     private bool isGameEnd;
     private bool isGameNow;
+    private bool isSendGameEnd;
     #endregion
 
     #region Network
@@ -90,6 +91,7 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         //共通処理
         Core = GetComponentInChildren<Core>();
         isGameEnd = false;
+        isSendGameEnd = false;
 
         if (!this.IsOwner)
         {
@@ -206,8 +208,9 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
         //プレイヤーが死亡したらサーバー側のゲームマネージャーに伝える
         if(States != null)
         {
-            if(States.isDead)
+            if(States.isDead && !isSendGameEnd)
             {
+                isSendGameEnd = true;
                 SetPlayerDeadServerRpc();
             }
 
@@ -397,8 +400,9 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
             stateMachine.ChangeState(IdleState);
             States?.InitState(playerData.maxHP);
             isGameEnd = false;
+            isSendGameEnd = false;
 
-            SetPlayerServerRpc();
+            //SetPlayerServerRpc();
         }
     }    
     
@@ -429,6 +433,12 @@ public class PlayerController : NetworkBehaviour , INetworkSerializable
     {
         isGameNow = flg;
         Damage?.SetCanDamage(flg);
+    }
+
+    [Unity.Netcode.ClientRpc]
+    public void ReturnLobbyClientRpc()
+    {
+        nowTeam = Team.None;
     }
     #endregion
 

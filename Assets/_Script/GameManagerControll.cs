@@ -71,17 +71,22 @@ public class GameManagerControll : NetworkBehaviour
                     //TODO::リスタート処理
                     Debug.Log("全員がリスタートを選択しました");
                     isGameEnd = false;
-                    PlayerController[] oldPlayer = new PlayerController[PlayerArray.Length];
                     for(int i= 0;i<PlayerArray.Length;i++)
                     {
-                        oldPlayer[i] = PlayerArray[i];
-                        PlayerArray[i] = null;
+                        PlayerArray[i].RestartClientRpc();
                         PlayerRestartInput[i] = false;
                         PlayerDeadFlg[i] = false;
-                    }
-                    for(int i = 0;i<oldPlayer.Length;i++)
-                    {
-                        oldPlayer[i].RestartClientRpc();
+
+                        PlayerController.Team nt = PlayerArray[i].GetNowTeam();
+                        switch (nt)
+                        {
+                            case PlayerController.Team.RedTeam:
+                                PlayerArray[i].SetPositionClientRpc(RedTeamSpawnTransform.position);
+                                break;
+                            case PlayerController.Team.BlueTeam:
+                                PlayerArray[i].SetPositionClientRpc(BlueTeamSpawnTransform.position);
+                                break;
+                        }
                     }
                     RedTeamCount = 0;
                     BlueTeamCount = 0;
@@ -143,6 +148,35 @@ public class GameManagerControll : NetworkBehaviour
                     isGameNow = true;
                 }
 
+            }
+            else
+            {
+                //ゲーム中の場合
+                //プレイヤーが抜けた場合ロビーに戻される処理
+                bool flg = false;
+                for(int i = 0;i<PlayerArray.Length;i++)
+                {
+                    if (PlayerArray[i] == null)
+                    {
+                        flg = true;
+                        Debug.Log("プレイヤーが抜けました。");
+                    }
+                }
+                //プレイヤーが抜けたときの処理
+                if(flg)
+                {
+                    isGameNow = false;
+                    SetAllPlayerLocation(LobbyTransform.position);
+                    for (int i = 0; i < PlayerArray.Length; i++)
+                    {
+                        if (PlayerArray[i] != null)
+                        {
+                            PlayerArray[i].ReturnLobbyClientRpc();
+                            PlayerArray[i].SetIsGameNowClientRpc(isGameNow);
+                            PlayerArray[i] = null;
+                        }
+                    }
+                }
             }
         }
 
@@ -226,6 +260,15 @@ public class GameManagerControll : NetworkBehaviour
                 default:
                     break;
             }
+        }
+    }
+
+    public void SetAllPlayerLocation(Vector3 location)
+    {
+        for (int i = 0; i < PlayerArray.Length; i++)
+        {
+            if (PlayerArray[i] != null)
+                PlayerArray[i].SetPositionClientRpc(location);
         }
     }
 
