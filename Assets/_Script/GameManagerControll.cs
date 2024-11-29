@@ -31,14 +31,14 @@ public class GameManagerControll : NetworkBehaviour
 
     private void Update()
     {
-        //ƒT[ƒo[‚ÌˆÈŠOˆ—‚µ‚È‚¢
+        //ã‚µãƒ¼ãƒãƒ¼ã®æ™‚ä»¥å¤–å‡¦ç†ã—ãªã„
         if (!this.IsServer)
         {
-            //ƒT[ƒo[‚¶‚á‚È‚¢‚Æ‚«‚Ìˆ—
+            //ã‚µãƒ¼ãƒãƒ¼ã˜ã‚ƒãªã„ã¨ãã®å‡¦ç†
         }
         else
         {
-            //ƒT[ƒo[‚Ì‚Ìˆ—
+            //ã‚µãƒ¼ãƒãƒ¼ã®æ™‚ã®å‡¦ç†
         }
 
 
@@ -76,7 +76,7 @@ public class GameManagerControll : NetworkBehaviour
             Player2HP = nowHP;
 
         player.SetNowHpClientRpc(nowHP);
-        Debug.Log(player.name + "‚ÌHP‚Í " + nowHP + " ‚Å‚·");
+        Debug.Log(player.name + "ã®HPã¯ " + nowHP + " ã§ã™");
     }
 
     public Sprite GetPlayer1Sprite()

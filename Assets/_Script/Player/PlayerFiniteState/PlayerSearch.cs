@@ -32,24 +32,24 @@ public class PlayerSearch : NetworkBehaviour
             {
                 Vector3 pos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
                 Debug.DrawRay(pos, posDelta, Color.red, 0.5f);
-                //Ray‚ğg—p‚µ‚Ätarget‚É“–‚½‚Á‚Ä‚¢‚é‚©”»•Ê
+                //Rayã‚’ä½¿ç”¨ã—ã¦targetã«å½“ãŸã£ã¦ã„ã‚‹ã‹åˆ¤åˆ¥
                 if (Physics.Raycast(pos, posDelta, out RaycastHit hit))
                 {
                     if (hit.collider == other)
                     {
-                        //‹ŠE“à‚Éû‚Ü‚Á‚Ä‚¢‚éˆ—
+                        //è¦–ç•Œå†…ã«åã¾ã£ã¦ã„ã‚‹å‡¦ç†
                         other.gameObject.layer = LayerMask.NameToLayer(showLayer);
                     }
                     else
                     {
-                        //ƒ^[ƒQƒbƒg‚ÆƒvƒŒƒCƒ„[‚ÌŠÔ‚É•Ê‚ÌƒIƒuƒWƒFƒNƒg‚ª“ü‚Á‚½ê‡
+                        //ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®é–“ã«åˆ¥ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒå…¥ã£ãŸå ´åˆ
                         other.gameObject.layer = LayerMask.NameToLayer(blindLayer);
                     }
                 }
             }
             else
             {
-                //Šp“x“à‚Éû‚Ü‚Á‚Ä‚¢‚È‚¢ê‡
+                //è§’åº¦å†…ã«åã¾ã£ã¦ã„ãªã„å ´åˆ
                 other.gameObject.layer = LayerMask.NameToLayer(blindLayer);
             }
         }
