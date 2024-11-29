@@ -10,7 +10,7 @@ namespace VSPoliceReBoot.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerController : NetworkBehaviour
     {
-        [SerializeField] private float _viewAngle = 45.0f;
+        //[SerializeField] private float _viewAngle = 45.0f;
         [SerializeField] private PlayerInputSO _playerInputSO;
         [SerializeField] private PlayerStatesSO _playerStatesSO;
         private bool _canMove;
@@ -69,10 +69,16 @@ namespace VSPoliceReBoot.Player
     }
 
     [Serializable]
-    public class PlayerInputInfo
+    public class PlayerInputInfo : INetworkSerializable
     {
         public Vector2 MoveInput;
         public bool ShotInput;
         public bool UseShotInput;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref MoveInput);
+            serializer.SerializeValue(ref ShotInput);
+            serializer.SerializeValue(ref UseShotInput);
+        }
     }
 }
