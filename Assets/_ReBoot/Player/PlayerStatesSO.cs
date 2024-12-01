@@ -7,5 +7,7 @@ namespace VSPoliceReBoot.Player
     public class PlayerStatesSO : ScriptableObject
     {
         public float MoveSpeed = 5.0f;
+        public float ViewAngle = 45.0f;
+        public float ViewDistance = 10.0f;
     }
 }
