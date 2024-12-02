@@ -1,5 +1,6 @@
 using System;
 using _ReBoot;
+using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace VSPoliceReBoot.Player
     {
         [SerializeField] private PlayerInputSO _playerInputSO;
         [SerializeField] private PlayerStatesSO _playerStatesSO;
+        [SerializeField] private GameObject _playerCamera;
         private bool _canMove;
         private SpriteRenderer _playerSpriteRend;
         private Rigidbody _rb;
@@ -20,6 +22,8 @@ namespace VSPoliceReBoot.Player
             
             _rb = GetComponent<Rigidbody>();
             _canMove = true;
+            CinemachineVirtualCamera camera = _playerCamera.GetComponent<CinemachineVirtualCamera>();
+            camera.Follow = transform;
         }
 
         private void Update()
