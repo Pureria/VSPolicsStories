@@ -6,7 +6,6 @@ namespace _ReBoot.Network
 {
     public interface INetworkObject
     {
-        public abstract void OnNetworkAwake();
         public abstract void OnNetworkStart();
         public abstract void OnNetworkPreUpdate();
         public abstract void OnNetworkFixedUpdate();
@@ -15,7 +14,6 @@ namespace _ReBoot.Network
 
     public interface INetworkHostFunction: INetworkObject
     {
-        public abstract void OnHostAwake();
         public abstract void OnHostStart();
         public abstract void OnHostPreUpdate();
         public abstract void OnHostFixedUpdate();
@@ -24,7 +22,6 @@ namespace _ReBoot.Network
 
     public interface INetworkClientFunction : INetworkObject
     {
-        public abstract void OnClientAwake();
         public abstract void OnClientStart();
         public abstract void OnClientPreUpdate();
         public abstract void OnClientFixedUpdate();
@@ -33,7 +30,6 @@ namespace _ReBoot.Network
     
     public interface INetworkOwnerFunction : INetworkObject
     {
-        public abstract void OnOwnerAwake();
         public abstract void OnOwnerStart();
         public abstract void OnOwnerPreUpdate();
         public abstract void OnOwnerFixedUpdate();

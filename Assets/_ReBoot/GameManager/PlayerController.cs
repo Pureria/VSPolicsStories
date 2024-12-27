@@ -1,5 +1,6 @@
 using System;
 using _ReBoot;
+using _ReBoot.Network;
 using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 namespace VSPoliceReBoot.Player
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerController : NetworkBehaviour, ICivObject
+    public class PlayerController : NetworkObjectBase, ICivObject
     {
         [SerializeField] private PlayerInputSO _playerInputSO;
         [SerializeField] private PlayerStatesSO _playerStatesSO;
@@ -16,25 +17,28 @@ namespace VSPoliceReBoot.Player
         private SpriteRenderer _playerSpriteRend;
         private Rigidbody _rb;
 
-        private void Awake()
+        public override void OnNetworkStart()
         {
-            if (!IsOwner) _playerSpriteRend.enabled = false;
-            
             _rb = GetComponent<Rigidbody>();
             _canMove = true;
             CinemachineVirtualCamera camera = _playerCamera.GetComponent<CinemachineVirtualCamera>();
             camera.Follow = transform;
         }
 
-        private void Update()
+        #region Owner Callbacks
+        public override void OnOwnerPreUpdate()
         {
-            //オーナーのみ処理を行う
-            if (!IsOwner)
-                return; 
-            
             SendInputServerRpc(_playerInputSO.PlayerInputInfo);
             CheckCivObject();
         }
+        #endregion
+
+        #region Client Callbacks
+        public override void OnClientStart()
+        {
+            _playerSpriteRend.enabled = false;
+        }
+        #endregion
 
         /// <summary>
         /// プレイヤーの入力をサーバーに送信
