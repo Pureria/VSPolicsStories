@@ -33,14 +33,14 @@ namespace VSPoliceReBoot.Network
         public virtual void OnClientFixedUpdate() { }
         public virtual void OnClientLateUpdate() { }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             //NetworkObjectManagerに登録
             if(SingletonPersistent<NetworkObjectManager>.Instance != null)
                 SingletonPersistent<NetworkObjectManager>.Instance.AddNetworkObject(this);
         }
         
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             //NetworkObjectManagerから削除
             if(SingletonPersistent<NetworkObjectManager>.Instance != null)

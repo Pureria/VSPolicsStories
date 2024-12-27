@@ -17,6 +17,7 @@ namespace VSPoliceReBoot.Player
         private SpriteRenderer _playerSpriteRend;
         private Rigidbody _rb;
 
+        #region Network Callbacks
         public override void OnNetworkStart()
         {
             _rb = GetComponent<Rigidbody>();
@@ -24,6 +25,7 @@ namespace VSPoliceReBoot.Player
             CinemachineVirtualCamera camera = _playerCamera.GetComponent<CinemachineVirtualCamera>();
             camera.Follow = transform;
         }
+        #endregion
 
         #region Owner Callbacks
         public override void OnOwnerPreUpdate()
@@ -59,6 +61,10 @@ namespace VSPoliceReBoot.Player
             Rot(inputInfo.RotDirection);
         }
 
+        /// <summary>
+        /// プレイヤーの移動処理
+        /// </summary>
+        /// <param name="moveInput"></param>
         private void Move(Vector2 moveInput)
         {
             if (!_canMove) return;
@@ -69,6 +75,10 @@ namespace VSPoliceReBoot.Player
             _rb.velocity = move;
         }
 
+        /// <summary>
+        /// プレイヤーの向きを変更
+        /// </summary>
+        /// <param name="rotDirection"></param>
         private void Rot(Vector2 rotDirection)
         {
             //プレイヤーの向きを変更
@@ -76,16 +86,23 @@ namespace VSPoliceReBoot.Player
             transform.Rotate(rot);
         }
 
+        /// <summary>
+        /// CIVObjectが視界に入っているか確認
+        /// </summary>
         private void CheckCivObject()
         {
             //CIVObjectが視界に入った場合EnterCIVを呼び出す。視界はプレイヤーの前方からViewAngleで指定した角度の範囲
             Collider[] colliders = Physics.OverlapSphere(transform.position, _playerStatesSO.ViewDistance);
             foreach (var collider in colliders)
             {
+                //自分自身の場合はスキップ
+                if(collider.transform == transform) continue;
+                //プレイヤーの前方からCIVObjectまでの方向を取得
                 Vector3 dir = collider.transform.position - transform.position;
                 float angle = Vector3.Angle(dir, transform.forward);
                 if (angle <= _playerStatesSO.ViewAngle)
                 {
+                    //CIVObjectのインターフェースを取得してEnterCIVを呼び出す
                     ICivObject civObject = collider.GetComponent<ICivObject>();
                     civObject?.OnEnterCIV();
                 }
@@ -94,17 +111,20 @@ namespace VSPoliceReBoot.Player
 
         public void OnEnterCIV()
         {
-            if (IsOwner) return;
+            //if (IsOwner) return;
             _playerSpriteRend.enabled = true;
         }
 
         public void OnExitCIV()
         {
-            if (IsOwner) return;
+            //if (IsOwner) return;
             _playerSpriteRend.enabled = false;
         }
     }
 
+    /// <summary>
+    /// プレイヤーの入力情報
+    /// </summary>
     [Serializable]
     public class PlayerInputInfo : INetworkSerializable
     {
