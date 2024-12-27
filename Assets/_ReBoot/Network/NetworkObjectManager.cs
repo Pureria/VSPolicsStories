@@ -12,8 +12,9 @@ namespace VSPoliceReBoot.Network
 
         private IList<NetworkObjectBase> _networkObjectBases;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _networkObjectBases = new List<NetworkObjectBase>();
             NetworkObjectBases = new ReadOnlyCollection<NetworkObjectBase>(_networkObjectBases);
         }
@@ -25,6 +26,7 @@ namespace VSPoliceReBoot.Network
                 nob.OnNetworkPreUpdate();
                 if(nob.IsHost) nob.OnHostPreUpdate();
                 if(nob.IsOwner) nob.OnOwnerPreUpdate();
+                else nob.OnNonOwnerPreUpdate();
                 if(nob.IsClient) nob.OnClientPreUpdate();
             }
         }
@@ -36,6 +38,7 @@ namespace VSPoliceReBoot.Network
                 nob.OnNetworkFixedUpdate();
                 if(nob.IsHost) nob.OnHostFixedUpdate();
                 if(nob.IsOwner) nob.OnOwnerFixedUpdate();
+                else nob.OnNonOwnerFixedUpdate();
                 if(nob.IsClient) nob.OnClientFixedUpdate();
             }
         }
@@ -47,6 +50,7 @@ namespace VSPoliceReBoot.Network
                 nob.OnNetworkLateUpdate();
                 if(nob.IsHost) nob.OnHostLateUpdate();
                 if(nob.IsOwner) nob.OnOwnerLateUpdate();
+                else nob.OnNonOwnerLateUpdate();
                 if(nob.IsClient) nob.OnClientLateUpdate();
             }
         }
@@ -57,6 +61,7 @@ namespace VSPoliceReBoot.Network
             networkObjectBase.OnNetworkStart();
             if(networkObjectBase.IsHost) networkObjectBase.OnHostStart();
             if(networkObjectBase.IsOwner) networkObjectBase.OnOwnerStart();
+            else networkObjectBase.OnNonOwnerStart();
             if(networkObjectBase.IsClient) networkObjectBase.OnClientStart();
             
             _networkObjectBases.Add(networkObjectBase);

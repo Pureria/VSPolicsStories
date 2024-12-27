@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace VSPoliceReBoot.Network
 {
-    public partial class NetworkObjectBase : NetworkBehaviour , INetworkHostFunction, INetworkOwnerFunction, INetworkClientFunction
+    public partial class NetworkObjectBase : NetworkBehaviour , INetworkHostFunction, INetworkNonOwnerFunction, INetworkOwnerFunction, INetworkClientFunction
     {
         //すべてのクラスで共通する処理
         public virtual void OnNetworkStart() { }
@@ -26,6 +26,12 @@ namespace VSPoliceReBoot.Network
         public virtual void OnOwnerPreUpdate() { }
         public virtual void OnOwnerFixedUpdate() { }
         public virtual void OnOwnerLateUpdate() { }
+        
+        //オーナーではないとき呼ばれる処理
+        public virtual void OnNonOwnerStart() { }
+        public virtual void OnNonOwnerPreUpdate() { }
+        public virtual void OnNonOwnerFixedUpdate() { }
+        public virtual void OnNonOwnerLateUpdate() { }
 
         //クライアントだと呼ばれる処理
         public virtual void OnClientStart() { }
@@ -33,7 +39,7 @@ namespace VSPoliceReBoot.Network
         public virtual void OnClientFixedUpdate() { }
         public virtual void OnClientLateUpdate() { }
 
-        protected virtual void OnEnable()
+        protected virtual void Start()
         {
             //NetworkObjectManagerに登録
             if(SingletonPersistent<NetworkObjectManager>.Instance != null)

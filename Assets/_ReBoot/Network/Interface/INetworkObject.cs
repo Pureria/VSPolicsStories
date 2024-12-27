@@ -19,6 +19,14 @@ namespace VSPoliceReBoot.Network
         public abstract void OnHostFixedUpdate();
         public abstract void OnHostLateUpdate();
     }
+    
+    public interface INetworkNonOwnerFunction : INetworkObject
+    {
+        public abstract void OnNonOwnerStart();
+        public abstract void OnNonOwnerPreUpdate();
+        public abstract void OnNonOwnerFixedUpdate();
+        public abstract void OnNonOwnerLateUpdate();
+    }
 
     public interface INetworkClientFunction : INetworkObject
     {

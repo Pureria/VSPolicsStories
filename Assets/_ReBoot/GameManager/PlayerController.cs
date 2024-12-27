@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Unity.Netcode;
 using Cinemachine;
+using UnityEngine.Serialization;
 using VSPoliceReBoot.Network;
 using VSPoliceReBoot.Object;
 
@@ -13,8 +14,8 @@ namespace VSPoliceReBoot.Player
         [SerializeField] private PlayerInputSO _playerInputSO;
         [SerializeField] private PlayerStatesSO _playerStatesSO;
         [SerializeField] private GameObject _playerCamera;
+        [SerializeField]private SpriteRenderer _playerSpriteRend;
         private bool _canMove;
-        private SpriteRenderer _playerSpriteRend;
         private Rigidbody _rb;
 
         #region Network Callbacks
@@ -28,6 +29,14 @@ namespace VSPoliceReBoot.Player
         #endregion
 
         #region Owner Callbacks
+        
+        public override void OnOwnerStart()
+        {
+            //プレイヤーカメラ生成
+            var playerCamera = Instantiate(_playerCamera, transform.position, _playerCamera.transform.rotation);
+            playerCamera.GetComponent<CinemachineVirtualCamera>().Follow = transform;
+        }
+        
         public override void OnOwnerPreUpdate()
         {
             SendInputServerRpc(_playerInputSO.PlayerInputInfo);
@@ -35,8 +44,8 @@ namespace VSPoliceReBoot.Player
         }
         #endregion
 
-        #region Client Callbacks
-        public override void OnClientStart()
+        #region Non Owner Callbacks
+        public override void OnNonOwnerStart()
         {
             _playerSpriteRend.enabled = false;
         }
@@ -58,7 +67,7 @@ namespace VSPoliceReBoot.Player
         {
             //プレイヤーの入力による動き
             Move(inputInfo.MoveInput);
-            Rot(inputInfo.RotDirection);
+            Rot(inputInfo.ViewPoint);
         }
 
         /// <summary>
@@ -79,11 +88,12 @@ namespace VSPoliceReBoot.Player
         /// プレイヤーの向きを変更
         /// </summary>
         /// <param name="rotDirection"></param>
-        private void Rot(Vector2 rotDirection)
+        private void Rot(Vector3 rotDirection)
         {
             //プレイヤーの向きを変更
-            Vector3 rot = new Vector3(0, rotDirection.x, 0);
-            transform.Rotate(rot);
+            rotDirection = rotDirection - transform.position;
+            rotDirection.y = 0;
+            transform.forward = rotDirection;
         }
 
         /// <summary>
@@ -129,7 +139,7 @@ namespace VSPoliceReBoot.Player
     public class PlayerInputInfo : INetworkSerializable
     {
         public Vector2 MoveInput;
-        public Vector2 RotDirection;
+        public Vector3 ViewPoint;
         public bool ShotInput;
         public bool UseShotInput;
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -137,7 +147,7 @@ namespace VSPoliceReBoot.Player
             serializer.SerializeValue(ref MoveInput);
             serializer.SerializeValue(ref ShotInput);
             serializer.SerializeValue(ref UseShotInput);
-            serializer.SerializeValue(ref RotDirection);
+            serializer.SerializeValue(ref ViewPoint);
         }
     }
 }
