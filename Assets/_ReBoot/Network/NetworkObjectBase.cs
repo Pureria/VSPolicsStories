@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using _ReBoot.Utilities;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -34,12 +35,16 @@ namespace _ReBoot.Network
 
         private void OnEnable()
         {
-            //TODO::ネットワークマネージャーに登録
+            //NetworkObjectManagerに登録
+            if(SingletonPersistent<NetworkObjectManager>.Instance != null)
+                SingletonPersistent<NetworkObjectManager>.Instance.AddNetworkObject(this);
         }
         
         private void OnDisable()
         {
-            //TODO::ネットワークマネージャの登録解除
+            //NetworkObjectManagerから削除
+            if(SingletonPersistent<NetworkObjectManager>.Instance != null)
+                SingletonPersistent<NetworkObjectManager>.Instance.RemoveNetworkObject(this);
         }
     }
 }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using _ReBoot.Utilities;
 
 namespace _ReBoot.Network
 {
-    public class NetworkObjectManager : MonoBehaviour
+    public class NetworkObjectManager : SingletonPersistent<NetworkObjectManager>
     {
         public ReadOnlyCollection<NetworkObjectBase> NetworkObjectBases { get; private set; }
 
