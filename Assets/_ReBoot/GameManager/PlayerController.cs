@@ -35,6 +35,8 @@ namespace VSPoliceReBoot.Player
             //プレイヤーカメラ生成
             var playerCamera = Instantiate(_playerCamera, transform.position, _playerCamera.transform.rotation);
             playerCamera.GetComponent<CinemachineVirtualCamera>().Follow = transform;
+            _playerSpriteRend.enabled = true;
+            Debug.Log("オーナー接続");
         }
         
         public override void OnOwnerPreUpdate()
@@ -48,6 +50,7 @@ namespace VSPoliceReBoot.Player
         public override void OnNonOwnerStart()
         {
             _playerSpriteRend.enabled = false;
+            Debug.Log("オーナー以外接続");
         }
         #endregion
 
