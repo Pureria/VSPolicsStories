@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace _ReBoot
+namespace VSPoliceReBoot.Object
 {
     /// <summary>
     /// ゲーム内のオブジェクトのインターフェース

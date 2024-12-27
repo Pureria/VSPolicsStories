@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _ReBoot.Network
+namespace VSPoliceReBoot.Network
 {
     public interface INetworkObject
     {

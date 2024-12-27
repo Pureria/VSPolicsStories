@@ -1,9 +1,9 @@
 using System;
-using _ReBoot;
-using _ReBoot.Network;
-using Cinemachine;
-using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
+using Cinemachine;
+using VSPoliceReBoot.Network;
+using VSPoliceReBoot.Object;
 
 namespace VSPoliceReBoot.Player
 {

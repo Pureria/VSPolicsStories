@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace _ReBoot.GameManager
+namespace VSPoliceReBoot.GameManager
 {
     
     public class GameManager : NetworkBehaviour

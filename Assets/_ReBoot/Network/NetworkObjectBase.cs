@@ -5,7 +5,7 @@ using _ReBoot.Utilities;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace _ReBoot.Network
+namespace VSPoliceReBoot.Network
 {
     public partial class NetworkObjectBase : NetworkBehaviour , INetworkHostFunction, INetworkOwnerFunction, INetworkClientFunction
     {
